@@ -54,7 +54,7 @@ public class Order : IAggregateRoot
 
     private bool CanAddProduct(Product product)
     {
-        //some checks
+        // some checks
         return true;
     }
 }

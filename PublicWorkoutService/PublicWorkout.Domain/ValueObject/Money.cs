@@ -11,7 +11,7 @@ public class Money
         this.Currency = currency;
     }
 
-    //The "Equals" and "GetHashCode" methods must be overrided for the value object
+    // The "Equals" and "GetHashCode" methods must be overrided for the value object
 
     public override bool Equals(object? obj)
     {

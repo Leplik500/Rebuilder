@@ -115,7 +115,7 @@ public class AuthorizationDefinition : ApplicationDefinition
                 policy =>
                 {
                     policy.RequireAuthenticatedUser();
-                    //policy.RequireClaim("scope", "api");
+                    // policy.RequireClaim("scope", "api");
                 }
             );
         });

@@ -5,7 +5,7 @@ using Serilog.Events;
 
 try
 {
-    //Configure logging
+    // Configure logging
     Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Debug()
         .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -13,26 +13,26 @@ try
         .WriteTo.Console()
         .CreateLogger();
 
-    //Create builder
+    // Create builder
     var builder = WebApplication.CreateBuilder(args);
 
-    //Host logging
+    // Host logging
     builder.Host.UseSerilog(
         (context, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration)
     );
 
-    //Add definitions
+    // Add definitions
     var assembly = typeof(Program).Assembly;
     await builder.AddApplicationDefinitions(assembly);
 
-    //Create web application
+    // Create web application
     var app = builder.Build();
 
-    //Use definitions
+    // Use definitions
     await app.UseApplicationDefinitions();
 
-    //Use logging
+    // Use logging
     if (
         app.Environment.IsDevelopment()
         || app.Environment.EnvironmentName == "Local"
@@ -43,7 +43,7 @@ try
 
     app.UseSerilogRequestLogging();
 
-    //Run app
+    // Run app
     await app.RunAsync();
 
     return 0;

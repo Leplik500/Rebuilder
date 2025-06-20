@@ -13,8 +13,8 @@ namespace PublicWorkout.Infrastructure.Database
 
         public async Task SeedAsync(CancellationToken cancellationToken = default)
         {
-            //TODO if you are not using migrations, then uncomment this line
-            //await _context!.Database.EnsureCreatedAsync(cancellationToken);
+            // TODO if you are not using migrations, then uncomment this line
+            // await _context!.Database.EnsureCreatedAsync(cancellationToken);
             var pending = await this._context.Database.GetPendingMigrationsAsync(
                 cancellationToken: cancellationToken
             );
@@ -28,7 +28,7 @@ namespace PublicWorkout.Infrastructure.Database
 
         public void Seed()
         {
-            //TODO if you are not using migrations, then uncomment this line
+            // TODO if you are not using migrations, then uncomment this line
             // _context!.Database.EnsureCreated();
             var pending = this._context.Database.GetPendingMigrations();
             if (pending.Any())
