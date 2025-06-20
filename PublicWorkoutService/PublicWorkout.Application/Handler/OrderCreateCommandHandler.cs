@@ -11,7 +11,8 @@ using PublicWorkout.Domain.Event;
 
 namespace PublicWorkout.Application.Handler;
 
-public class OrderCreateCommandHandler : IRequestHandler<OrderCreateCommand, ApiResult>
+public class OrderCreateCommandHandler
+    : IRequestHandler<OrderCreateCommand, ApiResult>
 {
     private readonly IUnitOfWorkManager _unitOfWorkManager;
     private readonly IMapper _mapper;
@@ -23,9 +24,9 @@ public class OrderCreateCommandHandler : IRequestHandler<OrderCreateCommand, Api
         IPublisher publisher
     )
     {
-        _unitOfWorkManager = unitOfWorkManager;
-        _mapper = mapper;
-        _publisher = publisher;
+        this._unitOfWorkManager = unitOfWorkManager;
+        this._mapper = mapper;
+        this._publisher = publisher;
     }
 
     public async Task<ApiResult> Handle(
@@ -34,11 +35,11 @@ public class OrderCreateCommandHandler : IRequestHandler<OrderCreateCommand, Api
     )
     {
         var unitOfWorkInstance =
-            _unitOfWorkManager.GetInstance<IUnitOfWorkEntityFrameworkInstance>();
+            this._unitOfWorkManager.GetInstance<IUnitOfWorkEntityFrameworkInstance>();
         var orderRepository = unitOfWorkInstance.GetRepository<Order>();
 
         var order = new Order(request.CreationDto.Id);
-        var products = _mapper.Map<List<Product>>(request.CreationDto.Products);
+        var products = this._mapper.Map<List<Product>>(request.CreationDto.Products);
         products.ForEach(item => order.AddProduct(item));
 
         await orderRepository.InsertAsync(order, cancellationToken);
@@ -47,14 +48,15 @@ public class OrderCreateCommandHandler : IRequestHandler<OrderCreateCommand, Api
         if (!unitOfWorkInstance.LastSaveChangesResult.IsOk)
         {
             var exception = unitOfWorkInstance.LastSaveChangesResult.Exception!;
-            var errorMessage = $"Unable to save changes to database | exception: {exception}";
+            var errorMessage =
+                $"Unable to save changes to database | exception: {exception}";
             return new ApiResult(
                 HttpStatusCode.InternalServerError,
                 new Exception(errorMessage, exception)
             );
         }
 
-        await _publisher.Publish(
+        await this._publisher.Publish(
             new OrderCreatedEvent(order.Id, order.CreationDate),
             cancellationToken: cancellationToken
         );

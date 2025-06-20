@@ -15,7 +15,7 @@ public interface IUserService
     /// <returns>
     /// A <see cref="Result{UserProfileDto}"/> containing the user's profile data if successful; otherwise, an error result.
     /// </returns>
-    Task<Result<UserProfileDto>> GetUserProfileAsync(
+    Task<Result<UserProfileDto>> GetCurrentUserProfileAsync(
         CancellationToken cancellationToken = default
     );
 
@@ -28,7 +28,7 @@ public interface IUserService
     /// A <see cref="Result"/> indicating success or failure of the update operation.
     /// </returns>
     Task<Result> UpdateUserProfileAsync(
-        UpdateUserProfileDto updateDto,
+        UpdateUserProfileDto? updateDto,
         CancellationToken cancellationToken = default
     );
 

@@ -6,7 +6,7 @@ public interface IAuditable
     /// Gets or sets DateTime of creation.
     /// This value will never changed.
     /// </summary>
-    DateTime CreatedAt { get; set; }
+    DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets DateTime of last value update.

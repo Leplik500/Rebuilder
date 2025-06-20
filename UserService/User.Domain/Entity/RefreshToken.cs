@@ -27,7 +27,7 @@ namespace User.Domain.Entity
         /// <summary>
         /// Gets or sets the date and time when the refresh token was created.
         /// </summary>
-        public required DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         /// <summary>
         /// Gets or sets the date and time when the refresh token was last updated.

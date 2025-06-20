@@ -13,7 +13,7 @@ public class OrderService : IOrderService
 
     public OrderService(IUnitOfWorkManager unitOfWorkManager)
     {
-        _unitOfWorkManager = unitOfWorkManager;
+        this._unitOfWorkManager = unitOfWorkManager;
     }
 
     public async Task<Order> GetOrderByIdAsync(
@@ -22,14 +22,15 @@ public class OrderService : IOrderService
     )
     {
         var unitOfWorkInstance =
-            _unitOfWorkManager.GetInstance<IUnitOfWorkEntityFrameworkInstance>();
+            this._unitOfWorkManager.GetInstance<IUnitOfWorkEntityFrameworkInstance>();
         unitOfWorkInstance.SetAutoDetectChanges(false);
 
         var orderRepository = unitOfWorkInstance.GetRepository<Order>();
         var order = (
             await orderRepository.GetFirstOrDefaultAsync(
                 predicate: x => x.Id == id,
-                include: include => include.Include(i => i.Items).Include(i => i.Taxes),
+                include: include =>
+                    include.Include(i => i.Items).Include(i => i.Taxes),
                 cancellationToken: cancellationToken
             )
         );

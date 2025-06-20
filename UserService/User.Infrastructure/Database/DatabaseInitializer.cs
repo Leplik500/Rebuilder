@@ -15,12 +15,12 @@ namespace User.Infrastructure.Database
         {
             //TODO if you are not using migrations, then uncomment this line
             //await _context!.Database.EnsureCreatedAsync(cancellationToken);
-            var pending = await context.Database.GetPendingMigrationsAsync(
+            var pending = await this.context.Database.GetPendingMigrationsAsync(
                 cancellationToken: cancellationToken
             );
             if (pending.Any())
             {
-                await context!.Database.MigrateAsync(
+                await this.context!.Database.MigrateAsync(
                     cancellationToken: cancellationToken
                 );
             }
@@ -30,10 +30,10 @@ namespace User.Infrastructure.Database
         {
             //TODO if you are not using migrations, then uncomment this line
             // _context!.Database.EnsureCreated();
-            var pending = context.Database.GetPendingMigrations();
+            var pending = this.context.Database.GetPendingMigrations();
             if (pending.Any())
             {
-                context!.Database.Migrate();
+                this.context!.Database.Migrate();
             }
         }
     }

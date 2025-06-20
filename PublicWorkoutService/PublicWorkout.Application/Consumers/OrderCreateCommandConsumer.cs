@@ -10,12 +10,15 @@ public class OrderCreateCommandConsumer : IConsumer<OrderCreateCommand>
 
     public OrderCreateCommandConsumer(IMediator mediator)
     {
-        _mediator = mediator;
+        this._mediator = mediator;
     }
 
     public async Task Consume(ConsumeContext<OrderCreateCommand> context)
     {
-        var result = await _mediator.Send(context.Message, context.CancellationToken);
+        var result = await this._mediator.Send(
+            context.Message,
+            context.CancellationToken
+        );
         await context.RespondAsync(result);
     }
 }

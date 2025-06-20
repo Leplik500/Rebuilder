@@ -14,7 +14,7 @@ public class OrderGetTotalPriceRequestHandler
 
     public OrderGetTotalPriceRequestHandler(IOrderService orderService)
     {
-        _orderService = orderService;
+        this._orderService = orderService;
     }
 
     public async Task<ApiResult<decimal>> Handle(
@@ -24,7 +24,10 @@ public class OrderGetTotalPriceRequestHandler
     {
         try
         {
-            var order = await _orderService.GetOrderByIdAsync(request.Id, cancellationToken);
+            var order = await this._orderService.GetOrderByIdAsync(
+                request.Id,
+                cancellationToken
+            );
             return new ApiResult<decimal>(order.GetTotalPrice(), HttpStatusCode.OK);
         }
         catch (NotFoundException exception)

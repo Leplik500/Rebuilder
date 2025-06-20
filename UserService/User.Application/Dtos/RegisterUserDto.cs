@@ -1,3 +1,3 @@
 namespace User.Application.Dtos;
 
-public record RegisterUserDto(string UserName, string Email, string Password);
+public record RegisterUserDto(string UserName, string Email);

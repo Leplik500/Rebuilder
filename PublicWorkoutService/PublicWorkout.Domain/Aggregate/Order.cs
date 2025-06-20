@@ -10,44 +10,45 @@ public class Order : IAggregateRoot
     private List<Product> _items;
     private List<Tax> _taxes;
 
-    public IReadOnlyCollection<Product> Items => _items.AsReadOnly();
-    public IReadOnlyCollection<Tax> Taxes => _taxes.AsReadOnly();
+    public IReadOnlyCollection<Product> Items => this._items.AsReadOnly();
+    public IReadOnlyCollection<Tax> Taxes => this._taxes.AsReadOnly();
 
     public Order(Guid id)
     {
-        Id = id;
-        CreationDate = DateTime.UtcNow;
-        _items = new List<Product>();
-        _taxes = new List<Tax>();
+        this.Id = id;
+        this.CreationDate = DateTime.UtcNow;
+        this._items = new List<Product>();
+        this._taxes = new List<Tax>();
     }
 
     public void AddProduct(Product product)
     {
         // The Agregate can determine whether it is possible to add such a product
-        if (!CanAddProduct(product))
+        if (!this.CanAddProduct(product))
         {
             return;
         }
-        _items.Add(product);
+        this._items.Add(product);
         // recalculating taxes and the total cost
-        RecalculateTaxesAndTotalPrice();
+        this.RecalculateTaxesAndTotalPrice();
     }
 
     public decimal GetTaxesAmount()
     {
-        return _taxes.Sum(x => x.Amount);
+        return this._taxes.Sum(x => x.Amount);
     }
 
     public decimal GetTotalPrice()
     {
-        return _items.Sum(item => item.Price * item.Quantity) + _taxes.Sum(tax => tax.Amount);
+        return this._items.Sum(item => item.Price * item.Quantity)
+            + this._taxes.Sum(tax => tax.Amount);
     }
 
     private void RecalculateTaxesAndTotalPrice(int taxPercent = 0)
     {
         if (taxPercent != 0)
         {
-            _taxes.ForEach(tax => tax.DecreaseByPercentage(taxPercent));
+            this._taxes.ForEach(tax => tax.DecreaseByPercentage(taxPercent));
         }
     }
 

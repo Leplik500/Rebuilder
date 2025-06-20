@@ -15,7 +15,7 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+        builder.ApplyConfigurationsFromAssembly(this.GetType().Assembly);
         base.OnModelCreating(builder);
     }
 }

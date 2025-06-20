@@ -7,7 +7,7 @@ public class Tax
 
     public void DecreaseByPercentage(int percent)
     {
-        var dec = Amount / 100 * percent;
-        this.Amount = Amount - dec;
+        var dec = this.Amount / 100 * percent;
+        this.Amount = this.Amount - dec;
     }
 }

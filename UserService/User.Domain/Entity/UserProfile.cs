@@ -12,6 +12,8 @@ public class UserProfile : IAuditable
     /// Gets or sets weight of user in kilograms.
     /// </summary>
     public required int Weight { get; set; }
+    public required int Height { get; set; }
+    public required int Age { get; set; }
 
     /// <summary>
     /// Gets or sets user's biological gender.
@@ -31,7 +33,7 @@ public class UserProfile : IAuditable
     /// <summary>
     /// Gets or sets timestamp when the user profile was created.
     /// </summary>
-    public required DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets timestamp when the user profile was last updated.

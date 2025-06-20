@@ -12,7 +12,7 @@ public class AuthorizationPolicyProvider : DefaultAuthorizationPolicyProvider
 
     /// <inheritdoc />
     public AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options)
-        : base(options) => _options = options.Value;
+        : base(options) => this._options = options.Value;
 
     /// <inheritdoc />
     public override async Task<AuthorizationPolicy?> GetPolicyAsync(
@@ -28,7 +28,7 @@ public class AuthorizationPolicyProvider : DefaultAuthorizationPolicyProvider
         policyExists = new AuthorizationPolicyBuilder()
             .AddRequirements(new PermissionRequirement(policyName))
             .Build();
-        _options.AddPolicy(policyName, policyExists);
+        this._options.AddPolicy(policyName, policyExists);
         return policyExists;
     }
 }

@@ -7,8 +7,8 @@ public class Money
 
     public Money(decimal amount, string currency)
     {
-        Amount = amount;
-        Currency = currency;
+        this.Amount = amount;
+        this.Currency = currency;
     }
 
     // The "Equals" and "GetHashCode" methods must be overrided for the value object
@@ -16,7 +16,7 @@ public class Money
     {
         if (obj is Money money)
         {
-            return Amount == money.Amount && Currency == money.Currency;
+            return this.Amount == money.Amount && this.Currency == money.Currency;
         }
 
         return false;
@@ -24,6 +24,6 @@ public class Money
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Amount, Currency);
+        return HashCode.Combine(this.Amount, this.Currency);
     }
 }

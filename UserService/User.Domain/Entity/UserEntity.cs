@@ -37,7 +37,7 @@ public class UserEntity : IAuditable
     /// <summary>
     /// Gets or sets the timestamp indicating when the user account was created.
     /// </summary>
-    public required DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the timestamp of the last update to the user account data.

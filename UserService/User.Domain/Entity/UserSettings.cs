@@ -11,7 +11,7 @@ public class UserSettings : IAuditable
     /// <summary>
     /// Gets or sets the unique identifier of the user to whom these settings belong.
     /// </summary>
-    public required Guid UserId { get; set; }
+    public required Guid? UserId { get; set; }
 
     /// <summary>
     /// Gets or sets the visual theme preference selected by the user.
@@ -26,7 +26,7 @@ public class UserSettings : IAuditable
     /// <summary>
     /// Gets or sets the timestamp indicating when the user settings were initially created.
     /// </summary>
-    public required DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the timestamp of the most recent update to the user settings.

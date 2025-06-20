@@ -31,7 +31,7 @@ public class AccessToken : IAuditable
     public required DateTime ExpiresAt { get; set; }
 
     /// <inheritdoc/>
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime? CreatedAt { get; set; }
 
     /// <inheritdoc/>
     public DateTime? UpdatedAt { get; set; }

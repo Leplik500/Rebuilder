@@ -4,8 +4,8 @@ public class OrderCreationDto
 {
     public OrderCreationDto(Guid id, List<ProductDto> products)
     {
-        Id = id;
-        Products = products;
+        this.Id = id;
+        this.Products = products;
     }
 
     public Guid Id { get; }

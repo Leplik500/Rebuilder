@@ -17,14 +17,14 @@ public sealed class UserIdentity
         ContextAccessor =
             httpContextAccessor
             ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-        IsInitialized = true;
+        this.IsInitialized = true;
     }
 
     public IIdentity? User
     {
         get
         {
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
                 return
                     ContextAccessor.HttpContext!.User.Identity != null
@@ -45,7 +45,7 @@ public sealed class UserIdentity
     {
         get
         {
-            if (User != null)
+            if (this.User != null)
             {
                 return ContextAccessor.HttpContext!.User.Claims;
             }
