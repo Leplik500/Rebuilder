@@ -1,6 +1,8 @@
 using Pepegov.MicroserviceFramework.AspNetCore.WebApplicationDefinition;
 using Pepegov.MicroserviceFramework.Definition;
 using Pepegov.MicroserviceFramework.Definition.Context;
+using User.Application.Dtos;
+using User.Application.Services.Interfaces;
 
 namespace User.UI.Api.EndPoints;
 
@@ -11,36 +13,52 @@ public class UserEndPoints : ApplicationDefinition
     )
     {
         var app = context.Parse<WebDefinitionApplicationContext>().WebApplication;
-        var group = app.MapGroup("users")
+        var group = app.MapGroup("/api/user")
             .WithOpenApi()
-            .WithTags("Users")
+            .WithTags("User")
             .RequireAuthorization();
 
-        group.MapGet("me", (Delegate)GetUserProfile);
-        group.MapPatch("me", (Delegate)UpdateUserProfile);
-        group.MapGet("settings", (Delegate)GetUserSettings);
-        group.MapPatch("settings", (Delegate)UpdateUserSettings);
+        group.MapGet("profile", GetCurrentUserProfile);
+        group.MapPatch("profile", UpdateUserProfile);
+        group.MapGet("settings", GetUserSettings);
+        group.MapPatch("settings", UpdateUserSettings);
 
         return base.ConfigureApplicationAsync(context);
     }
 
-    private static Task<IResult> UpdateUserSettings(HttpContext context)
+    private static async Task<IResult> UpdateUserSettings(
+        UpdateUserSettingsDto updateDto,
+        IUserService userService
+    )
     {
-        throw new NotImplementedException();
+        var result = await userService.UpdateUserSettingsAsync(updateDto);
+        return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
     }
 
-    private static Task<IResult> GetUserSettings(HttpContext context)
+    private static async Task<IResult> GetUserSettings(IUserService userService)
     {
-        throw new NotImplementedException();
+        var result = await userService.GetUserSettingsAsync();
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : Results.BadRequest(result.Errors);
     }
 
-    private static Task<IResult> UpdateUserProfile(HttpContext context)
+    private static async Task<IResult> UpdateUserProfile(
+        UpdateUserProfileDto updateDto,
+        IUserService userService
+    )
     {
-        throw new NotImplementedException();
+        var result = await userService.UpdateUserProfileAsync(updateDto);
+        return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Errors);
     }
 
-    private static Task<IResult> GetUserProfile(HttpContext context)
+    private static async Task<IResult> GetCurrentUserProfile(
+        IUserService userService
+    )
     {
-        throw new NotImplementedException();
+        var result = await userService.GetCurrentUserProfileAsync();
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : Results.BadRequest(result.Errors);
     }
 }
