@@ -8,7 +8,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<AccessToken> AccessTokens { get; set; }
     public DbSet<OneTimePassword> OneTimePasswords { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
-    public DbSet<Domain.Entity.UserEntity> Users { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<UserSettings> UserSettings { get; set; }
 

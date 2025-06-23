@@ -12,14 +12,6 @@ public class UserMappingProfile : Profile
         this.CreateMap<UserEntity, UserDto>();
         this.CreateMap<UserSettings, UpdateUserSettingsDto>();
         this.CreateMap<UserSettings, UserSettingsDto>();
-        // .ForMember(
-        //     dest => dest.Theme,
-        //     opt => opt.MapFrom(src => src.Theme.ToString())
-        // )
-        // .ForMember(
-        //     dest => dest.Language,
-        //     opt => opt.MapFrom(src => src.Language.ToString())
-        // );
         this.CreateMap<UserProfile, UpdateUserProfileDto>();
         this.CreateMap<UserProfile, UserProfileDto>();
 
