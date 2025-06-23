@@ -18,12 +18,6 @@ public class AuthMappingProfile : Profile
             )
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
 
-        this.CreateMap<UserEntity, UserDto>()
-            .ForMember(
-                dest => dest.Role,
-                opt => opt.MapFrom(src => src.Role.ToString())
-            );
-
         // OneTimePassword mappings
         this.CreateMap<VerifyOtpRequestDto, OneTimePassword>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -34,7 +28,6 @@ public class AuthMappingProfile : Profile
             .ForMember(dest => dest.IsUsed, opt => opt.Ignore());
 
         // Reverse mappings for reading operations
-        this.CreateMap<UserEntity, RegisterUserDto>();
         this.CreateMap<OneTimePassword, VerifyOtpRequestDto>()
             .ForCtorParam("Email", opt => opt.MapFrom(_ => (string)null!)) // Явное указание null
             .ForCtorParam("OtpCode", opt => opt.MapFrom(src => src.OtpCode));
