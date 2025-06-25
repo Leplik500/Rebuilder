@@ -168,7 +168,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -204,7 +203,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -310,7 +308,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -411,7 +408,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -572,7 +568,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -628,7 +623,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -669,7 +663,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 

@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using AutoMapper;
 using FluentResults;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -20,7 +19,6 @@ public class AuthService(
     IRepositoryProvider repositoryProvider,
     IEmailService emailService,
     IOtpGenerator otpGenerator,
-    IMapper mapper,
     IOptions<JwtSettings> jwtSettings
 ) : IAuthService
 {
@@ -207,7 +205,7 @@ public class AuthService(
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
-                Token = GenerateRefreshToken(user), // Предполагается метод генерации токена
+                Token = GenerateRefreshToken(), // Предполагается метод генерации токена
                 ExpiresAt = DateTime.UtcNow.AddDays(7), // Срок действия 7 дней
                 CreatedAt = DateTime.UtcNow,
                 IsRevoked = false,
@@ -405,7 +403,6 @@ public class AuthService(
         }
 
         /* 1. Валидация входных данных */
-
         if (
             string.IsNullOrWhiteSpace(registration.Email)
             || !IsValidEmail(registration.Email)
@@ -414,6 +411,32 @@ public class AuthService(
 
         if (string.IsNullOrWhiteSpace(registration.UserName))
             return Result.Fail("Invalid username: Username cannot be empty");
+
+        if (registration.Weight is < 30 or > 300)
+            return Result.Fail("Weight must be between 30 and 300 kg");
+
+        if (registration.Height is < 50 or > 250)
+            return Result.Fail("Height must be between 50 and 250 cm");
+
+        if (registration.Age is < 13 or > 120)
+            return Result.Fail("Age must be between 13 and 120 years");
+
+        if (!Enum.TryParse<Gender>(registration.Gender, out _))
+            return Result.Fail("Invalid Gender value. Allowed values: Male, Female");
+
+        if (!Enum.TryParse<ActivityLevel>(registration.ActivityLevel, out _))
+        {
+            return Result.Fail(
+                "Invalid ActivityLevel value. Allowed values: Low, Average, High"
+            );
+        }
+
+        if (!Enum.TryParse<FitnessGoal>(registration.FitnessGoal, out _))
+        {
+            return Result.Fail(
+                "Invalid FitnessGoal value. Allowed values: WeightLoss, WeightGain, FormMaintence"
+            );
+        }
 
         try
         {
@@ -456,9 +479,29 @@ public class AuthService(
             };
 
             await userRepo.InsertAsync(newUser, cancellationToken);
+
+            /* 5. Создание профиля пользователя с данными из DTO */
+            var userProfileRepo = repositoryProvider.GetRepository<UserProfile>();
+            var newProfile = new UserProfile
+            {
+                UserId = newUser.Id,
+                Weight = registration.Weight,
+                Height = registration.Height,
+                Age = registration.Age,
+                Gender = Enum.Parse<Gender>(registration.Gender),
+                ActivityLevel = Enum.Parse<ActivityLevel>(
+                    registration.ActivityLevel
+                ),
+                FitnessGoal = Enum.Parse<FitnessGoal>(registration.FitnessGoal),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = null,
+            };
+            await userProfileRepo.InsertAsync(newProfile, cancellationToken);
+
+            /* 6. Сохранение изменений */
             repositoryProvider.SaveChanges();
 
-            /* 5. Формирование результата */
+            /* 7. Формирование результата */
             var userDto = new UserDto(
                 Id: newUser.Id,
                 UserName: newUser.UserName,
@@ -495,7 +538,7 @@ public class AuthService(
         }
     }
 
-    private static string GenerateRefreshToken(UserEntity user)
+    private static string GenerateRefreshToken()
     {
         // Для refresh token используется случайная строка, так как он не содержит claims
         // и проверяется только по значению в базе данных

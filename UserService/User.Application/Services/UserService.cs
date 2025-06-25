@@ -21,10 +21,11 @@ public class UserService(
     )
     {
         if (!userContext.IsAuthenticated || userContext.UserId == Guid.Empty)
+        {
             return Result.Fail("Unauthorized access");
+        }
 
         var userId = userContext.UserId;
-
         var userProfileRepository = repositoryProvider.GetRepository<UserProfile>();
 
         var userProfile = await userProfileRepository.GetFirstOrDefaultAsync(
@@ -37,7 +38,23 @@ public class UserService(
         );
 
         if (userProfile == null || userProfile.UserId == Guid.Empty)
-            return Result.Fail("Not found");
+        {
+            // Создаем профиль с дефолтными значениями
+            userProfile = new UserProfile
+            {
+                UserId = (Guid)userId!,
+                Weight = 0,
+                Height = 0,
+                Age = 0,
+                Gender = Gender.Male,
+                ActivityLevel = ActivityLevel.Low,
+                FitnessGoal = FitnessGoal.WeightLoss,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = null,
+            };
+            await userProfileRepository.InsertAsync(userProfile, cancellationToken);
+            repositoryProvider.SaveChanges();
+        }
 
         var userProfileDto = mapper.Map<UserProfileDto>(userProfile);
         return Result.Ok(userProfileDto);
@@ -140,7 +157,7 @@ public class UserService(
                 cancellationToken
             );
 
-            // 4. Если настройки не найдены, возвращаем настройки по умолчанию
+            // 4. Если настройки не найдены, создаем и сохраняем дефолтные настройки
             if (userSettings == null)
             {
                 var defaultSettings = new UserSettings
@@ -151,6 +168,9 @@ public class UserService(
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = null,
                 };
+
+                await repository.InsertAsync(defaultSettings, cancellationToken);
+                repositoryProvider.SaveChanges();
 
                 var defaultDto = mapper.Map<UserSettingsDto>(defaultSettings);
                 return Result.Ok(defaultDto);

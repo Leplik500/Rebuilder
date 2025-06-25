@@ -58,7 +58,13 @@ namespace User.Tests
             // Arrange
             var registration = new RegisterUserDto(
                 Email: "test@example.com",
-                UserName: "testuser"
+                UserName: "testuser",
+                ActivityLevel: "Low",
+                Age: 30,
+                Weight: 100,
+                Height: 180,
+                Gender: "Male",
+                FitnessGoal: "WeightLoss"
             );
 
             UserEntity? capturedUser = null;
@@ -99,7 +105,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -135,7 +140,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -145,21 +149,39 @@ namespace User.Tests
                 (
                     Registration: new RegisterUserDto(
                         Email: "",
-                        UserName: "testuser"
+                        UserName: "testuser",
+                        ActivityLevel: "Low",
+                        Age: 30,
+                        Weight: 100,
+                        Height: 180,
+                        Gender: "Male",
+                        FitnessGoal: "WeightLoss"
                     ),
                     Reason: "empty email"
                 ),
                 (
                     Registration: new RegisterUserDto(
-                        Email: "invalid-email",
-                        UserName: "testuser"
+                        Email: "test@com",
+                        UserName: "testuser",
+                        ActivityLevel: "Low",
+                        Age: 30,
+                        Weight: 100,
+                        Height: 180,
+                        Gender: "Male",
+                        FitnessGoal: "WeightLoss"
                     ),
                     Reason: "invalid email format"
                 ),
                 (
                     Registration: new RegisterUserDto(
                         Email: "test@example.com",
-                        UserName: ""
+                        UserName: "",
+                        ActivityLevel: "Low",
+                        Age: 30,
+                        Weight: 100,
+                        Height: 180,
+                        Gender: "Male",
+                        FitnessGoal: "WeightLoss"
                     ),
                     Reason: "empty username"
                 ),
@@ -234,8 +256,14 @@ namespace User.Tests
         {
             // Arrange
             var registration = new RegisterUserDto(
-                Email: "existing@example.com",
-                UserName: "newuser"
+                Email: "test@example.com",
+                UserName: "testuser",
+                ActivityLevel: "Low",
+                Age: 30,
+                Weight: 100,
+                Height: 180,
+                Gender: "Male",
+                FitnessGoal: "WeightLoss"
             );
 
             var existingUser = new UserEntity
@@ -270,7 +298,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -304,8 +331,14 @@ namespace User.Tests
         {
             // Arrange
             var registration = new RegisterUserDto(
-                Email: "new@example.com",
-                UserName: "existinguser"
+                Email: "test@example.com",
+                UserName: "testuser",
+                ActivityLevel: "Low",
+                Age: 30,
+                Weight: 100,
+                Height: 180,
+                Gender: "Male",
+                FitnessGoal: "WeightLoss"
             );
 
             var existingUser = new UserEntity
@@ -340,7 +373,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -378,7 +410,13 @@ namespace User.Tests
             // Arrange
             var registration = new RegisterUserDto(
                 Email: "test@example.com",
-                UserName: "testuser"
+                UserName: "testuser",
+                ActivityLevel: "Low",
+                Age: 30,
+                Weight: 100,
+                Height: 180,
+                Gender: "Male",
+                FitnessGoal: "WeightLoss"
             );
 
             var cts = new CancellationTokenSource();
@@ -410,7 +448,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 
@@ -428,7 +465,13 @@ namespace User.Tests
             // Arrange
             var registration = new RegisterUserDto(
                 Email: "test@example.com",
-                UserName: "testuser"
+                UserName: "testuser",
+                ActivityLevel: "Low",
+                Age: 30,
+                Weight: 100,
+                Height: 180,
+                Gender: "Male",
+                FitnessGoal: "WeightLoss"
             );
 
             userRepoMock
@@ -452,7 +495,6 @@ namespace User.Tests
                 providerMock.Object,
                 emailServiceMock.Object,
                 otpGeneratorMock.Object,
-                mapper,
                 jwtSettingsMock.Object
             );
 

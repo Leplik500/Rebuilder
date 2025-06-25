@@ -8,7 +8,7 @@ public class UserMappingProfile : Profile
 {
     public UserMappingProfile()
     {
-        this.CreateMap<UserEntity, RegisterUserDto>();
+        // this.CreateMap<UserEntity, RegisterUserDto>();
         this.CreateMap<UserEntity, UserDto>();
         this.CreateMap<UserSettings, UpdateUserSettingsDto>();
         this.CreateMap<UserSettings, UserSettingsDto>();
