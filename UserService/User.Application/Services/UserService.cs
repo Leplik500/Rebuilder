@@ -95,6 +95,7 @@ public class UserService(
 
             // 7. Сохранение изменений
             repository.Update(existingProfile);
+            repositoryProvider.SaveChanges();
 
             return Result.Ok();
         }
@@ -243,6 +244,8 @@ public class UserService(
 
                 repository.Update(existingSettings);
             }
+
+            repositoryProvider.SaveChanges();
 
             return Result.Ok();
         }

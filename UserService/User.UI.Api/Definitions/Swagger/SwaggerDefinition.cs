@@ -1,18 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Pepegov.MicroserviceFramework.AspNetCore.WebApplicationDefinition;
 using Pepegov.MicroserviceFramework.Definition;
 using Pepegov.MicroserviceFramework.Definition.Context;
 using Pepegov.MicroserviceFramework.Infrastructure.Attributes;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using Template.Net.Microservice.ThreeTier.PL.Definitions.Identity.Options;
 using User.Application;
 
 namespace User.UI.Api.Definitions.Swagger;
 
 /// <summary>
-/// Swagger definition for application
+/// Swagger definition for application.
 /// </summary>
 public class SwaggerDefinition : ApplicationDefinition
 {
@@ -23,11 +22,6 @@ public class SwaggerDefinition : ApplicationDefinition
     {
         var webContext = context.Parse<WebDefinitionApplicationContext>();
 
-        using var scope = webContext.WebApplication.Services.CreateAsyncScope();
-        var client = scope
-            .ServiceProvider.GetService<IOptions<IdentityClientOption>>()!
-            .Value;
-
         webContext.WebApplication.UseSwagger();
         webContext.WebApplication.UseSwaggerUI(settings =>
         {
@@ -36,9 +30,6 @@ public class SwaggerDefinition : ApplicationDefinition
             settings.DefaultModelRendering(ModelRendering.Model);
             settings.DefaultModelsExpandDepth(0);
             settings.DocExpansion(DocExpansion.None);
-            settings.OAuthScopeSeparator(" ");
-            settings.OAuthClientId(client.Id);
-            settings.OAuthClientSecret(client.Secret);
             settings.DisplayRequestDuration();
         });
 
@@ -69,11 +60,14 @@ public class SwaggerDefinition : ApplicationDefinition
 
             options.ResolveConflictingActions(x => x.First());
 
-            var filePath = Path.Combine(
-                AppContext.BaseDirectory,
-                $"{typeof(Program).Assembly.GetName().Name}.xml"
-            );
-            options.IncludeXmlComments(filePath);
+            // Включаем XML-комментарии для документации
+            var xmlFilename =
+                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+            if (File.Exists(xmlPath))
+            {
+                options.IncludeXmlComments(xmlPath);
+            }
 
             options.TagActionsBy(api =>
             {
@@ -102,53 +96,24 @@ public class SwaggerDefinition : ApplicationDefinition
                 return tags;
             });
 
-            var url = context
-                .Configuration.GetSection("IdentityServerUrl")
-                .GetValue<string>("Authority");
-            var currentClient = context
-                .Configuration.GetSection("CurrentIdentityClient")
-                .Get<IdentityClientOption>()!;
-            var scopes = currentClient.Scopes!.ToDictionary(x => x, x => x);
+            // Добавляем пользовательский фильтр для обработки входных моделей
+            options.OperationFilter<CustomOperationFilter>();
+            // options.OperationFilter<AuthenticationRequirementsOperationFilter>();
 
+            // Добавляем поддержку JWT Bearer токенов
             options.AddSecurityDefinition(
-                "oauth2",
+                "Bearer",
                 new OpenApiSecurityScheme
                 {
-                    Type = SecuritySchemeType.OAuth2,
-                    Flows = new OpenApiOAuthFlows
-                    {
-                        AuthorizationCode = new OpenApiOAuthFlow
-                        {
-                            AuthorizationUrl = new Uri(
-                                $"{url}/connect/authorize",
-                                UriKind.Absolute
-                            ),
-                            TokenUrl = new Uri(
-                                $"{url}/connect/token",
-                                UriKind.Absolute
-                            ),
-                            Scopes = scopes,
-                        },
-                        ClientCredentials = new OpenApiOAuthFlow
-                        {
-                            Scopes = scopes,
-                            TokenUrl = new Uri(
-                                $"{url}/connect/token",
-                                UriKind.Absolute
-                            ),
-                        },
-                        Password = new OpenApiOAuthFlow
-                        {
-                            TokenUrl = new Uri(
-                                $"{url}/connect/token",
-                                UriKind.Absolute
-                            ),
-                            Scopes = scopes,
-                        },
-                    },
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description =
+                        "JWT Authorization header using the Bearer scheme. Введите токен без префикса 'Bearer '.",
                 }
             );
-
             options.AddSecurityRequirement(
                 new OpenApiSecurityRequirement
                 {
@@ -158,13 +123,10 @@ public class SwaggerDefinition : ApplicationDefinition
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "oauth2",
+                                Id = "Bearer",
                             },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header,
                         },
-                        new List<string>()
+                        []
                     },
                 }
             );

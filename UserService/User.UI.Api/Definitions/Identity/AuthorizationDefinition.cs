@@ -1,20 +1,17 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using OpenIddict.Server.AspNetCore;
 using Pepegov.MicroserviceFramework.AspNetCore.WebApplicationDefinition;
 using Pepegov.MicroserviceFramework.Definition;
 using Pepegov.MicroserviceFramework.Definition.Context;
 using Template.Net.Microservice.ThreeTier.PL.Definitions.Identity;
-using Template.Net.Microservice.ThreeTier.PL.Definitions.Identity.Options;
 using User.Application;
-using User.UI.Api.Definitions.OpenIddict;
 
 namespace User.UI.Api.Definitions.Identity;
 
 /// <summary>
-/// Authorization Policy registration
+/// Authorization Policy registration.
 /// </summary>
 public class AuthorizationDefinition : ApplicationDefinition
 {
@@ -23,118 +20,165 @@ public class AuthorizationDefinition : ApplicationDefinition
         IDefinitionServiceContext definitionContext
     )
     {
-        var url = definitionContext
-            .Configuration.GetSection("IdentityServerUrl")
-            .GetValue<string>("Authority");
-        var currentClient = definitionContext
-            .Configuration.GetSection("CurrentIdentityClient")
-            .Get<IdentityClientOption>()!;
+        // Получаем настройки JWT из конфигурации (предполагается, что они есть в appsettings)
+        var jwtSettings = definitionContext.Configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings.GetValue<string>("SecretKey");
+        var issuer = jwtSettings.GetValue<string>("Issuer");
 
         definitionContext
             .ServiceCollection.AddAuthentication(options =>
             {
-                options.DefaultScheme =
-                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme =
-                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme =
-                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme;
+                options.DefaultScheme = AuthData.AuthenticationSchemes;
+                options.DefaultChallengeScheme = AuthData.AuthenticationSchemes;
+                options.DefaultAuthenticateScheme = AuthData.AuthenticationSchemes;
             })
-            .AddJwtBearer(
-                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-                "Bearer",
-                options =>
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.SaveToken = true;
-                    options.Audience = currentClient.Id;
-                    options.Authority = url;
-                    options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateAudience = false, // Audience should be defined on the authorization server or disabled as shown
-                        ClockSkew = new TimeSpan(0, 0, 30),
-                    };
+                    ValidateIssuer = true,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            secretKey ?? "temporary_key_for_debugging_only_32_chars"
+                        )
+                    ),
+                    ClockSkew = TimeSpan.FromSeconds(30),
+                };
 
-                    options.Events = new JwtBearerEvents
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = async context =>
                     {
-                        OnChallenge = context =>
+                        var logger =
+                            context.HttpContext.RequestServices.GetRequiredService<
+                                ILogger<AuthorizationDefinition>
+                            >();
+                        logger.LogWarning("JWT Authentication challenge triggered.");
+
+                        if (context.AuthenticateFailure != null)
                         {
-                            context.HandleResponse();
-                            context.Response.StatusCode =
-                                StatusCodes.Status401Unauthorized;
-                            context.Response.ContentType = "application/json";
-
-                            // Ensure we always have an error and error description.
-                            if (string.IsNullOrEmpty(context.Error))
-                            {
-                                context.Error = "invalid_token";
-                            }
-
-                            if (string.IsNullOrEmpty(context.ErrorDescription))
-                            {
-                                context.ErrorDescription =
-                                    "This request requires a valid JWT access token to be provided";
-                            }
-
-                            // Add some extra context for expired tokens.
+                            logger.LogError(
+                                context.AuthenticateFailure,
+                                "Authentication failure: {Message}",
+                                context.AuthenticateFailure.Message
+                            );
+                        }
+                        else
+                        {
+                            logger.LogWarning(
+                                "No authentication failure exception available. Checking if token is present."
+                            );
+                            // Проверяем, есть ли заголовок Authorization
                             if (
-                                context.AuthenticateFailure != null
-                                && context.AuthenticateFailure.GetType()
-                                    == typeof(SecurityTokenExpiredException)
+                                !context.HttpContext.Request.Headers.ContainsKey(
+                                    "Authorization"
+                                )
                             )
                             {
-                                var authenticationException =
-                                    context.AuthenticateFailure
-                                    as SecurityTokenExpiredException;
-                                context.Response.Headers.Append(
-                                    "x-token-expired",
-                                    authenticationException?.Expires.ToString("o")
+                                logger.LogWarning(
+                                    "Authorization header is missing in the request."
                                 );
-                                context.ErrorDescription =
-                                    $"The token expired on {authenticationException?.Expires:o}";
                             }
+                            else
+                            {
+                                var authHeader = context
+                                    .HttpContext.Request.Headers["Authorization"]
+                                    .ToString();
+                                logger.LogWarning(
+                                    "Authorization header found: {AuthHeader}",
+                                    authHeader
+                                );
+                            }
+                        }
 
-                            return context.Response.WriteAsync(
-                                JsonSerializer.Serialize(
-                                    new
-                                    {
-                                        error = context.Error,
-                                        error_description = context.ErrorDescription,
-                                    }
-                                )
+                        logger.LogWarning(
+                            "Error: {Error}, Description: {Description}",
+                            context.Error,
+                            context.ErrorDescription
+                        );
+
+                        context.HandleResponse();
+                        context.Response.StatusCode =
+                            StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+
+                        var errorResponse = new
+                        {
+                            error = context.Error ?? "unauthorized",
+                            error_description = context.ErrorDescription
+                                ?? "Authentication failed. Please provide valid credentials.",
+                        };
+
+                        if (
+                            context.AuthenticateFailure
+                            is SecurityTokenExpiredException expiredException
+                        )
+                        {
+                            logger.LogWarning(
+                                "Token expired at: {Expires}",
+                                expiredException.Expires
                             );
-                        },
-                    };
-                }
-            );
+                            context.Response.Headers.Append(
+                                "x-token-expired",
+                                expiredException.Expires.ToString("o")
+                            );
+                            errorResponse = new
+                            {
+                                error = context.Error ?? "token_expired",
+                                error_description = $"The token expired on {expiredException.Expires:o}",
+                            };
+                        }
+
+                        await context.Response.WriteAsync(
+                            JsonSerializer.Serialize(errorResponse)
+                        );
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        var logger =
+                            context.HttpContext.RequestServices.GetRequiredService<
+                                ILogger<AuthorizationDefinition>
+                            >();
+                        logger.LogInformation(
+                            "Token validated successfully for user: {User}",
+                            context.Principal?.Identity?.Name ?? "Unknown"
+                        );
+                        return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        var logger =
+                            context.HttpContext.RequestServices.GetRequiredService<
+                                ILogger<AuthorizationDefinition>
+                            >();
+                        logger.LogError(
+                            context.Exception,
+                            "Authentication failed: {Message}",
+                            context.Exception.Message
+                        );
+                        return Task.CompletedTask;
+                    },
+                };
+                ;
+            });
 
         definitionContext.ServiceCollection.AddAuthorization(options =>
         {
             options.AddPolicy(
-                AuthData.AuthenticationSchemes,
+                "AuthenticatedUserPolicy", // Можно использовать константу, если она определена где-то в проекте
                 policy =>
                 {
                     policy.RequireAuthenticatedUser();
-                    // policy.RequireClaim("scope", "api");
+                    // Если нужны дополнительные требования, например, роли, добавь их здесь
+                    // policy.RequireRole("Admin", "User");
                 }
             );
         });
-
-        definitionContext.ServiceCollection.AddSingleton<
-            IAuthorizationPolicyProvider,
-            AuthorizationPolicyProvider
-        >();
-        definitionContext.ServiceCollection.AddSingleton<
-            IAuthorizationHandler,
-            AppPermissionHandler
-        >();
-
-        definitionContext.ServiceCollection.Configure<IdentityAddressOption>(
-            definitionContext.Configuration.GetSection("IdentityServerUrl")
-        );
-        definitionContext.ServiceCollection.Configure<IdentityClientOption>(
-            definitionContext.Configuration.GetSection("CurrentIdentityClient")
-        );
 
         return base.ConfigureServicesAsync(definitionContext);
     }

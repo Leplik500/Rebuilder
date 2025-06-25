@@ -47,7 +47,6 @@ public class AuthService(
         {
             /* 2. Поиск пользователя */
             var userRepo = repositoryProvider.GetRepository<UserEntity>();
-            // ИСПРАВЛЕНО: используем полную сигнатуру, как в тестах
             var user = await userRepo.GetFirstOrDefaultAsync(
                 predicate: u => u.Email == email,
                 orderBy: null,
@@ -62,7 +61,6 @@ public class AuthService(
 
             /* 3. Инвалидация всех активных OTP */
             var otpRepo = repositoryProvider.GetRepository<OneTimePassword>();
-            // ИСПРАВЛЕНО: используем полную сигнатуру, как в тестах
             var activeOtps = await otpRepo.GetAllAsync(
                 predicate: o =>
                     o.UserId == user.Id
@@ -79,6 +77,7 @@ public class AuthService(
             {
                 oldOtp.IsUsed = true;
                 otpRepo.Update(oldOtp);
+                repositoryProvider.SaveChanges();
             }
 
             /* 4. Генерация нового OTP */
@@ -107,6 +106,7 @@ public class AuthService(
             };
 
             await otpRepo.InsertAsync(newOtp, cancellationToken);
+            repositoryProvider.SaveChanges();
 
             return Result.Ok();
         }
@@ -188,6 +188,7 @@ public class AuthService(
             /* 4. Пометка OTP как использованного */
             otp.IsUsed = true;
             otpRepo.Update(otp);
+            repositoryProvider.SaveChanges();
 
             /* 5. Генерация AccessToken и RefreshToken */
             var accessTokenRepo = repositoryProvider.GetRepository<AccessToken>();
@@ -214,6 +215,7 @@ public class AuthService(
 
             await accessTokenRepo.InsertAsync(accessToken, cancellationToken);
             await refreshTokenRepo.InsertAsync(refreshToken, cancellationToken);
+            repositoryProvider.SaveChanges();
 
             /* 6. Формирование результата */
             var jwtTokenDto = new JwtTokenDto(
@@ -307,6 +309,7 @@ public class AuthService(
             };
 
             await accessTokenRepo.InsertAsync(accessToken, cancellationToken);
+            repositoryProvider.SaveChanges();
 
             /* 5. Формирование результата */
             var jwtTokenDto = new JwtTokenDto(
@@ -370,6 +373,7 @@ public class AuthService(
             /* 3. Отзывание токена */
             tokenEntity.IsRevoked = true;
             refreshTokenRepo.Update(tokenEntity);
+            repositoryProvider.SaveChanges();
 
             return Result.Ok();
         }
@@ -452,6 +456,7 @@ public class AuthService(
             };
 
             await userRepo.InsertAsync(newUser, cancellationToken);
+            repositoryProvider.SaveChanges();
 
             /* 5. Формирование результата */
             var userDto = new UserDto(

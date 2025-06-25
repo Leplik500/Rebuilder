@@ -34,13 +34,15 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.1" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\User.Application\User.Application.csproj" />
     </ItemGroup>
 
-<!--    <ItemGroup>-->
+
+    <!--    <ItemGroup>-->
 <!--        <AdditionalFiles Include="..\..\stylecop.json" />-->
 <!--    </ItemGroup>-->
 

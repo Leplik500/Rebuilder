@@ -1,3 +1,4 @@
+using FluentResults;
 using Pepegov.UnitOfWork;
 using Pepegov.UnitOfWork.EntityFramework;
 using Pepegov.UnitOfWork.EntityFramework.Repository;
@@ -20,5 +21,18 @@ public class RepositoryProvider : IRepositoryProvider
         where TEntity : class
     {
         return this.unitOfWorkInstance.GetRepository<TEntity>();
+    }
+
+    public Result SaveChanges()
+    {
+        this.unitOfWorkInstance.SaveChanges();
+
+        if (this.unitOfWorkInstance.LastSaveChangesResult.IsOk)
+            return Result.Ok();
+
+        var exception = this.unitOfWorkInstance.LastSaveChangesResult.Exception!;
+        var errorMessage =
+            $"Unable to save changes to database | exception: {exception}";
+        return Result.Fail(errorMessage);
     }
 }

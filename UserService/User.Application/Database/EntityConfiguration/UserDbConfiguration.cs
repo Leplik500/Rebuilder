@@ -6,7 +6,7 @@ namespace User.Application.Database.EntityConfiguration;
 
 public class UserDbConfiguration : IEntityTypeConfiguration<Domain.Entity.UserEntity>
 {
-    public void Configure(EntityTypeBuilder<Domain.Entity.UserEntity> builder)
+    public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
         builder.HasKey(user => user.Id);
         builder
