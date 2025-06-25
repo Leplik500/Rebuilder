@@ -1,7 +1,3 @@
-// <copyright file="UserContextDefinition.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using Pepegov.MicroserviceFramework.Definition;
 using Pepegov.MicroserviceFramework.Definition.Context;
 using User.Infrastructure;
@@ -14,6 +10,7 @@ public class UserContextDefinition : ApplicationDefinition
         IDefinitionServiceContext context
     )
     {
+        context.ServiceCollection.AddHttpContextAccessor();
         context.ServiceCollection.AddScoped<IUserContext, UserContext>();
         await base.ConfigureServicesAsync(context);
     }

@@ -1,31 +1,61 @@
 using System.Security.Claims;
-using Template.Net.Microservice.ThreeTier.PL.Definitions.Identity;
+using Microsoft.AspNetCore.Http;
 
 namespace User.Infrastructure;
 
-public class UserContext : IUserContext
+public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
 {
     public IEnumerable<Claim> Claims
     {
-        get => UserIdentity.Instance.Claims;
+        get
+        {
+            var user = httpContextAccessor.HttpContext?.User;
+            return user?.Claims ?? [];
+        }
     }
 
     public bool IsAuthenticated
     {
-        get => this.Claims.Any(c => c.Type == ClaimTypes.NameIdentifier);
+        get
+        {
+            var user = httpContextAccessor.HttpContext?.User;
+            return user?.Identity?.IsAuthenticated ?? false;
+        }
     }
 
     public Guid? UserId
     {
         get
         {
-            var userIdClaim = this.Claims.FirstOrDefault(c =>
-                c.Type == ClaimTypes.NameIdentifier
-            );
-            if (userIdClaim == null)
+            var userIdClaim = this
+                .Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)
+                ?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
                 return null;
 
-            return Guid.TryParse(userIdClaim.Value, out var guid) ? guid : null;
+            // Пытаемся распарсить строку в Guid
+            if (Guid.TryParse(userIdClaim, out var userId))
+                return userId;
+
+            return null;
+        }
+    }
+
+    public string? UserName
+    {
+        get
+        {
+            return this.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+        }
+    }
+
+    public string? Email
+    {
+        get
+        {
+            return this
+                .Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)
+                ?.Value;
         }
     }
 }

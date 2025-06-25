@@ -21,6 +21,7 @@ public class AuthorizationDefinition : ApplicationDefinition
     )
     {
         // Получаем настройки JWT из конфигурации (предполагается, что они есть в appsettings)
+        definitionContext.ServiceCollection.AddHttpContextAccessor();
         var jwtSettings = definitionContext.Configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings.GetValue<string>("SecretKey");
         var issuer = jwtSettings.GetValue<string>("Issuer");
@@ -194,11 +195,6 @@ public class AuthorizationDefinition : ApplicationDefinition
         webContext.WebApplication.UseCors(AppData.PolicyName);
         webContext.WebApplication.UseAuthentication();
         webContext.WebApplication.UseAuthorization();
-
-        // registering UserIdentity helper as singleton
-        UserIdentity.Instance.Configure(
-            webContext.WebApplication.Services.GetService<IHttpContextAccessor>()!
-        );
 
         return base.ConfigureApplicationAsync(context);
     }
