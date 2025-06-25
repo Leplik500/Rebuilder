@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using Pepegov.MicroserviceFramework.AspNetCore.WebApplicationDefinition;
 using Pepegov.MicroserviceFramework.Definition;
 using Pepegov.MicroserviceFramework.Definition.Context;
-using Template.Net.Microservice.ThreeTier.PL.Definitions.Identity;
 using User.Application;
 
 namespace User.UI.Api.Definitions.Identity;
