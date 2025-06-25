@@ -26,7 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\UserService\User.Application\User.Application.csproj" />
+      <ProjectReference Include="..\PublicWorkout\PublicWorkout.Application\PublicWorkout.Application.csproj" />
     </ItemGroup>
 
 </Project>

@@ -5,12 +5,11 @@ using Pepegov.MicroserviceFramework.AspNetCore.WebApplicationDefinition;
 using Pepegov.MicroserviceFramework.Definition;
 using Pepegov.MicroserviceFramework.Definition.Context;
 using Pepegov.MicroserviceFramework.Infrastructure.Attributes;
+using PublicWorkout.Application;
 using PublicWorkout.Application.Dtos;
-using PublicWorkout.UI.Api.Definitions.Swagger;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using User.Application;
 
-namespace User.UI.Api.Definitions.Swagger;
+namespace PublicWorkout.UI.Api.Definitions.Swagger;
 
 /// <summary>
 /// Swagger definition for application.
@@ -24,7 +23,9 @@ public class SwaggerDefinition : ApplicationDefinition
     {
         var webContext = context.Parse<WebDefinitionApplicationContext>();
 
-        webContext.WebApplication.UseSwagger();
+        webContext.WebApplication.UseSwagger(options =>
+            options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0
+        );
         webContext.WebApplication.UseSwaggerUI(settings =>
         {
             settings.InjectStylesheet("/swagger/dark-theme.css");
@@ -34,6 +35,7 @@ public class SwaggerDefinition : ApplicationDefinition
             settings.DocExpansion(DocExpansion.None);
             settings.DisplayRequestDuration();
         });
+        // webContext.WebApplication.MapGet("/", () => Results.Redirect("/swagger"));
 
         return base.ConfigureApplicationAsync(context);
     }
@@ -132,7 +134,7 @@ public class SwaggerDefinition : ApplicationDefinition
             // Добавляем фильтр для регистрации дополнительных схем
             options.DocumentFilter<AdditionalSchemasDocumentFilter>();
 
-            // На всякий случай, явно задаем идентификатор схемы
+            // Настраиваем идентификатор схемы, чтобы использовать только имя типа
             options.CustomSchemaIds(type => type.Name);
         });
 
