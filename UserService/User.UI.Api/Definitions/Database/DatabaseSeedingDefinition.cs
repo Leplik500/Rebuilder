@@ -4,14 +4,14 @@ using Pepegov.MicroserviceFramework.Definition.Context;
 namespace User.UI.Api.Definitions.Database;
 
 /// <summary>
-/// Registration seeding worker
+/// Registration seeding worker.
 /// </summary>
 public class DatabaseSeedingDefinition : ApplicationDefinition
 {
     /// <inheritdoc />
     public override Task ConfigureServicesAsync(IDefinitionServiceContext context)
     {
-        // context.ServiceCollection.AddHostedService<DatabaseSeedingWorker>();
+        context.ServiceCollection.AddHostedService<DatabaseSeedingWorker>();
         return base.ConfigureServicesAsync(context);
     }
 }
